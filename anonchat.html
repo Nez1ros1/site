@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AnonimuZ</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--green:#00ff41;--green2:#00cc33}
+html,body{
+  width:100%;height:100%;background:#000;color:var(--green);
+  font-family:'Share Tech Mono',monospace;overflow:hidden
+}
+#matrix{position:fixed;inset:0;width:100%;height:100%;z-index:0;opacity:.14}
+.overlay{
+  position:fixed;inset:0;z-index:1;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(0,40,0,.18), transparent 35%),
+    radial-gradient(ellipse 85% 85% at 50% 50%, rgba(0,10,0,.45) 0%, rgba(0,0,0,.96) 100%)
+}
+.h-line{position:fixed;left:0;right:0;top:184px;height:1px;background:rgba(0,255,65,.14);z-index:2}
+.scanline{
+  position:fixed;top:0;left:0;right:0;height:2px;background:rgba(0,255,65,.06);
+  animation:scanDown 7s linear infinite;z-index:5;pointer-events:none
+}
+@keyframes scanDown{from{top:0}to{top:100%}}
+.corner{position:fixed;width:36px;height:36px;z-index:3}
+.c-tl{top:14px;left:14px;border-top:1px solid rgba(0,255,65,.35);border-left:1px solid rgba(0,255,65,.35)}
+.c-tr{top:14px;right:14px;border-top:1px solid rgba(0,255,65,.35);border-right:1px solid rgba(0,255,65,.35)}
+.c-bl{bottom:14px;left:14px;border-bottom:1px solid rgba(0,255,65,.35);border-left:1px solid rgba(0,255,65,.35)}
+.c-br{bottom:14px;right:14px;border-bottom:1px solid rgba(0,255,65,.35);border-right:1px solid rgba(0,255,65,.35)}
+.sys{position:fixed;z-index:3;font-size:9px;letter-spacing:2px;color:rgba(0,255,65,.12)}
+.sys-tl{top:20px;left:50px}.sys-br{bottom:20px;right:50px}
+.hidden{display:none!important}
+
+/* MENU */
+.page-menu,.page-chat{
+  position:fixed;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;padding:24px
+}
+.menu-container{
+  width:390px;display:flex;flex-direction:column;align-items:center;animation:fadeIn 1s ease forwards
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.logo-wrap{text-align:center;margin-bottom:28px}
+.logo-image{
+  width:118px;height:118px;object-fit:cover;border-radius:18px;display:block;margin:0 auto 16px;
+  border:1px solid rgba(0,255,65,.18);box-shadow:0 0 20px rgba(0,255,65,.08)
+}
+.logo-image.small{width:86px;height:86px;border-radius:14px}
+.logo-fallback{
+  width:118px;height:118px;margin:0 auto 16px;display:none;align-items:center;justify-content:center;
+  border:1px solid rgba(0,255,65,.18);border-radius:18px;color:#00ff41;font-family:'Orbitron',monospace;
+  font-size:52px;box-shadow:0 0 20px rgba(0,255,65,.08)
+}
+.logo-fallback.small{
+  width:86px;height:86px;border-radius:14px;font-size:40px
+}
+.logo-title{
+  font-family:'Orbitron',monospace;font-weight:900;font-size:34px;letter-spacing:4px;
+  color:#00ff41;text-shadow:0 0 12px rgba(0,255,65,.4);line-height:1
+}
+.logo-title.small{font-size:30px}
+.logo-sub{margin-top:8px;font-size:9px;letter-spacing:7px;color:#1e4f26}
+.logo-line{
+  width:120px;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,65,.6),transparent);
+  margin:12px auto 0
+}
+.logo-line.small{width:108px}
+.menu{width:100%;display:flex;flex-direction:column;gap:10px}
+.btn{
+  width:100%;background:transparent;border:1px solid rgba(0,255,65,.3);color:#00cc33;
+  font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:3px;padding:15px 20px;cursor:pointer;
+  text-align:left;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden;transition:all .2s;
+  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))
+}
+.btn::after{content:'';position:absolute;inset:0;background:rgba(0,255,65,0);transition:background .2s}
+.btn:hover{border-color:rgba(0,255,65,.75);color:#00ff41;text-shadow:0 0 8px rgba(0,255,65,.5)}
+.btn:hover::after{background:rgba(0,255,65,.06)}
+.btn-corner{position:absolute;top:4px;right:4px;width:7px;height:7px;border-top:1px solid rgba(0,255,65,.45);border-right:1px solid rgba(0,255,65,.45)}
+.btn-dot{position:absolute;bottom:5px;left:5px;width:3px;height:3px;border-radius:50%;background:rgba(0,255,65,.3)}
+.btn-muted{border-color:rgba(0,255,65,.12);color:#1e4a1e}
+.btn-muted:hover{border-color:rgba(0,255,65,.35);color:#009922;text-shadow:none}
+.status{
+  margin-top:28px;display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:4px;color:#1a4020
+}
+.dot{width:6px;height:6px;border-radius:50%;background:#00ff41;box-shadow:0 0 6px #00ff41;animation:pulse 2.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* CHAT */
+.shell{width:min(1100px,100%);height:min(760px,calc(100vh - 56px));display:grid;grid-template-columns:290px 1fr;gap:18px}
+.panel,.chat{
+  position:relative;border:1px solid rgba(0,255,65,.18);background:rgba(0,8,0,.35);backdrop-filter:blur(2px)
+}
+.panel{
+  padding:22px 18px;
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px))
+}
+.info-box{border:1px solid rgba(0,255,65,.14);padding:12px;margin-bottom:12px;background:rgba(0,0,0,.22)}
+.info-label{font-size:9px;letter-spacing:3px;color:rgba(0,255,65,.42);margin-bottom:8px}
+.info-value{color:#9effb8;font-size:13px;word-break:break-word}
+.nav-btn{
+  width:100%;min-height:48px;margin-bottom:10px;background:transparent;border:1px solid rgba(0,255,65,.22);color:var(--green2);
+  text-align:left;padding:0 16px;font-family:inherit;font-size:12px;letter-spacing:3px;cursor:pointer;position:relative;
+  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))
+}
+.nav-btn:hover{border-color:rgba(0,255,65,.48);color:var(--green);background:rgba(0,255,65,.05)}
+.nav-btn::before{content:'';position:absolute;top:4px;right:4px;width:6px;height:6px;border-top:1px solid rgba(0,255,65,.38);border-right:1px solid rgba(0,255,65,.38)}
+.nav-btn::after{content:'';position:absolute;bottom:5px;left:5px;width:3px;height:3px;border-radius:50%;background:rgba(0,255,65,.28)}
+.chat{
+  display:grid;grid-template-rows:76px 1fr 86px;
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));overflow:hidden
+}
+.chat-top{
+  border-bottom:1px solid rgba(0,255,65,.14);display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;gap:18px;background:rgba(0,12,0,.28)
+}
+.room-title{font-family:'Orbitron',monospace;font-size:20px;letter-spacing:3px;color:var(--green)}
+.room-meta{font-size:10px;letter-spacing:2px;color:rgba(0,255,65,.38);margin-top:6px}
+.top-right{display:flex;gap:10px;align-items:center}
+.mini{
+  min-height:38px;padding:0 14px;background:transparent;border:1px solid rgba(0,255,65,.2);color:#66ff92;
+  font-family:inherit;font-size:10px;letter-spacing:2px;cursor:pointer
+}
+.mini:hover{border-color:rgba(0,255,65,.45);background:rgba(0,255,65,.05)}
+.messages{padding:18px;overflow:auto;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:min(78%,760px);border:1px solid rgba(0,255,65,.14);background:rgba(0,12,0,.28);padding:12px 14px 10px}
+.msg.self{align-self:flex-end;border-color:rgba(0,255,65,.28);background:rgba(0,255,65,.06)}
+.msg-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:8px}
+.msg-user{font-size:11px;letter-spacing:2px;color:#72ff9f}
+.msg-time{font-size:10px;letter-spacing:1px;color:rgba(0,255,65,.4)}
+.msg-text{color:#c6ffd6;font-size:14px;line-height:1.55;word-break:break-word}
+.msg-status{margin-top:8px;font-size:10px;letter-spacing:2px;color:rgba(0,255,65,.35);text-align:right}
+.chat-bottom{
+  border-top:1px solid rgba(0,255,65,.14);padding:16px 18px;background:rgba(0,10,0,.3);display:grid;grid-template-columns:1fr 150px;gap:12px
+}
+.chat-input{
+  width:100%;height:54px;background:rgba(0,0,0,.45);border:1px solid rgba(0,255,65,.2);color:var(--green);
+  padding:0 16px;outline:none;font-family:inherit;font-size:14px
+}
+.chat-input:focus{border-color:rgba(0,255,65,.48);box-shadow:0 0 0 1px rgba(0,255,65,.08),0 0 18px rgba(0,255,65,.05)}
+.send-btn{
+  height:54px;background:rgba(0,255,65,.08);border:1px solid rgba(0,255,65,.34);color:var(--green);
+  font-family:inherit;font-size:12px;letter-spacing:3px;cursor:pointer
+}
+.send-btn:hover{background:rgba(0,255,65,.14);border-color:rgba(0,255,65,.6)}
+.empty,.loading{
+  display:flex;align-items:center;justify-content:center;height:100%;min-height:220px;color:rgba(0,255,65,.24);
+  font-size:12px;letter-spacing:3px;text-align:center;padding:20px
+}
+.toast{
+  position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(20px);z-index:30;background:rgba(0,10,0,.92);
+  border:1px solid rgba(0,255,65,.28);color:#b8ffcc;padding:10px 14px;font-size:11px;letter-spacing:2px;opacity:0;
+  transition:.25s ease;pointer-events:none
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.gate{
+  position:fixed;inset:0;z-index:25;background:rgba(0,0,0,.84);display:none;align-items:center;justify-content:center;padding:20px
+}
+.gate.show{display:flex}
+.gate-box,.modal{
+  width:100%;max-width:450px;background:rgba(0,8,0,.94);border:1px solid rgba(0,255,65,.34);
+  box-shadow:0 0 25px rgba(0,255,65,.12), inset 0 0 30px rgba(0,255,65,.03);
+  clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));
+  padding:22px;position:relative
+}
+.gate-title,.modal-title{font-family:'Orbitron',monospace;font-size:18px;letter-spacing:3px;color:#00ff41;margin-bottom:14px}
+.gate-text,.modal-text{font-size:11px;line-height:1.6;color:#2f8d45;margin-bottom:14px}
+.gate-input,.input{
+  width:100%;height:48px;background:rgba(0,0,0,.45);border:1px solid rgba(0,255,65,.2);color:var(--green);
+  padding:0 14px;outline:none;font-family:inherit
+}
+.input{height:auto;padding:13px 14px;font-size:14px}
+.gate-btn,.primary-btn,.secondary-btn{
+  min-height:46px;font-family:inherit;letter-spacing:3px;font-size:11px;cursor:pointer;transition:.2s ease
+}
+.gate-btn,.primary-btn{background:rgba(0,255,65,.08);border:1px solid rgba(0,255,65,.38);color:#00ff41}
+.gate-btn:hover,.primary-btn:hover{background:rgba(0,255,65,.15);border-color:rgba(0,255,65,.7)}
+.secondary-btn{background:transparent;border:1px solid rgba(0,255,65,.18);color:#1e7d34}
+.secondary-btn:hover{color:#00cc33;border-color:rgba(0,255,65,.38)}
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px);z-index:20;display:none;
+  align-items:center;justify-content:center;padding:20px
+}
+.modal-backdrop.open{display:flex}
+.modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+.close-btn{
+  width:34px;height:34px;background:transparent;border:1px solid rgba(0,255,65,.25);color:#00cc33;cursor:pointer;font-family:inherit
+}
+.close-btn:hover{border-color:rgba(0,255,65,.6);color:#00ff41}
+.field{margin-bottom:14px}
+.label{display:block;font-size:10px;letter-spacing:3px;color:#1fb94f;margin-bottom:7px}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.result-box{
+  margin-top:16px;padding:12px;border:1px solid rgba(0,255,65,.18);background:rgba(0,0,0,.45);display:none
+}
+.result-box.show{display:block}
+.result-label{font-size:10px;letter-spacing:3px;color:#228d42;margin-bottom:8px}
+.result-link{
+  width:100%;background:transparent;border:none;color:#9dffb9;font-family:inherit;font-size:12px;word-break:break-all;outline:none
+}
+.check-row{
+  display:flex;align-items:center;gap:10px;margin-bottom:14px;color:#7edb94;font-size:12px;letter-spacing:2px
+}
+.check-row input{accent-color:#00ff41;width:16px;height:16px}
+.pass-wrap{display:none}
+.pass-wrap.show{display:block}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr;height:calc(100vh - 40px)}
+  .panel{display:none}
+  .chat{grid-template-rows:92px 1fr 86px}
+  .chat-top{align-items:flex-start;flex-direction:column;justify-content:center;padding:14px 16px}
+  .top-right{width:100%}.mini{flex:1}
+}
+@media (max-width:600px){
+  .page-menu,.page-chat{padding:10px}
+  .chat-bottom{grid-template-columns:1fr}
+  .room-title{font-size:16px}
+  .msg{max-width:92%}
+  .menu-container{width:min(390px,calc(100vw - 34px))}
+  .logo-title{font-size:28px}
+  .logo-sub{letter-spacing:4px}
+  .row{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+<div class="overlay"></div>
+<div class="scanline"></div>
+<div class="h-line"></div>
+<div class="corner c-tl"></div><div class="corner c-tr"></div><div class="corner c-bl"></div><div class="corner c-br"></div>
+<div class="sys sys-tl">SYS::ONLINE</div>
+<div class="sys sys-br">ENC::AES-256</div>
+
+<!-- MENU PAGE -->
+<div class="page-menu" id="menuPage">
+  <div class="menu-container">
+    <div class="logo-wrap">
+      <img src="anonimuz.jpg" alt="AnonimuZ icon" class="logo-image" id="menuLogoImage">
+      <div class="logo-fallback" id="menuLogoFallback">A</div>
+      <div class="logo-title">AnonimuZ</div>
+      <div class="logo-sub">SECURE · ANONYMOUS · ENCRYPTED</div>
+      <div class="logo-line"></div>
+    </div>
+
+    <div class="menu">
+      <button class="btn" id="openCreateBtn">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1.5" width="14" height="10" rx="1" stroke="#00cc33" stroke-width="1.1"/><path d="M5 11.5l3 2.5 3-2.5" stroke="#00cc33" stroke-width="1.1"/><line x1="4" y1="5.5" x2="12" y2="5.5" stroke="#00cc33" stroke-width="0.9" opacity="0.5"/><line x1="4" y1="8" x2="9" y2="8" stroke="#00cc33" stroke-width="0.9" opacity="0.5"/></svg>
+        СОЗДАТЬ ЧАТ<div class="btn-corner"></div><div class="btn-dot"></div>
+      </button>
+
+      <button class="btn" id="openJoinBtn">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h10" stroke="#00cc33" stroke-width="1.2" stroke-linecap="round"/><path d="M8 4l5 4-5 4" stroke="#00cc33" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><rect x="0.5" y="1" width="5" height="14" rx="0.5" stroke="#00cc33" stroke-width="0.9" opacity="0.3"/></svg>
+        ПРИСОЕДИНИТЬСЯ К ЧАТУ<div class="btn-corner"></div><div class="btn-dot"></div>
+      </button>
+
+      <button class="btn" id="openGeneralBtn">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#00cc33" stroke-width="1.1"/><ellipse cx="8" cy="8" rx="2.5" ry="6.5" stroke="#00cc33" stroke-width="0.9" opacity="0.5"/><line x1="1.5" y1="6" x2="14.5" y2="6" stroke="#00cc33" stroke-width="0.9" opacity="0.4"/><line x1="1.5" y1="10" x2="14.5" y2="10" stroke="#00cc33" stroke-width="0.9" opacity="0.4"/></svg>
+        ОБЩИЙ ЧАТ<div class="btn-corner"></div><div class="btn-dot"></div>
+      </button>
+
+      <button class="btn btn-muted" id="supportBtn">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.1"/><path d="M8 7v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="8" cy="4.8" r="0.9" fill="currentColor"/></svg>
+        ПОДДЕРЖКА<div class="btn-corner"></div><div class="btn-dot"></div>
+      </button>
+    </div>
+
+    <div class="status"><div class="dot"></div>ЗАЩИЩЕНО · E2E · TOR READY</div>
+  </div>
+</div>
+
+<!-- CHAT PAGE -->
+<div class="page-chat hidden" id="chatPage">
+  <div class="shell">
+    <aside class="panel">
+      <div class="logo-wrap">
+        <img src="anonimuz.jpg" alt="AnonimuZ icon" class="logo-image small" id="chatLogoImage">
+        <div class="logo-fallback small" id="chatLogoFallback">A</div>
+        <div class="logo-title small">AnonimuZ</div>
+        <div class="logo-sub">SECURE · ANONYMOUS · ENCRYPTED</div>
+        <div class="logo-line small"></div>
+      </div>
+
+      <div class="info-box"><div class="info-label">ROOM</div><div class="info-value" id="sidebarRoom">private-room</div></div>
+      <div class="info-box"><div class="info-label">NICK</div><div class="info-value" id="sidebarNick">ghost</div></div>
+      <div class="info-box"><div class="info-label">TYPE</div><div class="info-value" id="sidebarType">PRIVATE CHAT</div></div>
+
+      <button class="nav-btn" id="copyInviteBtn">КОПИРОВАТЬ ССЫЛКУ</button>
+      <button class="nav-btn" id="backBtn">НАЗАД НА ГЛАВНУЮ</button>
+
+      <div class="status"><div class="dot"></div>ONLINE · FIREBASE · ANON</div>
+    </aside>
+
+    <main class="chat">
+      <div class="chat-top">
+        <div>
+          <div class="room-title" id="roomTitle">PRIVATE-ROOM</div>
+          <div class="room-meta">ROOM ID: <span id="roomIdLabel">private-room</span> · USER: <span id="nickLabel">ghost</span></div>
+        </div>
+        <div class="top-right">
+          <button class="mini" id="copyTopBtn">COPY INVITE</button>
+          <button class="mini" id="leaveBtn">LEAVE</button>
+        </div>
+      </div>
+
+      <div class="messages" id="messages">
+        <div class="loading" id="loadingState">ПОДКЛЮЧЕНИЕ К СЕРВЕРУ...</div>
+      </div>
+
+      <div class="chat-bottom">
+        <input class="chat-input" id="messageInput" type="text" placeholder="Введи сообщение..." maxlength="1000">
+        <button class="send-btn" id="sendBtn">ОТПРАВИТЬ</button>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-backdrop" id="createModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div class="modal-title">СОЗДАТЬ ЧАТ</div>
+      <button class="close-btn" type="button" data-close="createModal">✕</button>
+    </div>
+    <div class="modal-text">Создай приватную комнату, укажи свой ник и выбери, нужен ли пароль для входа.</div>
+
+    <div class="field">
+      <label class="label" for="createNick">ТВОЙ НИК</label>
+      <input class="input" id="createNick" type="text" placeholder="например, ghost_user" maxlength="32">
+    </div>
+
+    <div class="field">
+      <label class="label" for="createRoomName">ИМЯ ЧАТА</label>
+      <input class="input" id="createRoomName" type="text" placeholder="например, private-room" maxlength="40">
+    </div>
+
+    <label class="check-row">
+      <input type="checkbox" id="needPassword">
+      НУЖЕН ПАРОЛЬ
+    </label>
+
+    <div class="field pass-wrap" id="passwordWrap">
+      <label class="label" for="createPassword">ПАРОЛЬ ЧАТА</label>
+      <input class="input" id="createPassword" type="password" placeholder="введи пароль">
+    </div>
+
+    <div class="row">
+      <button class="primary-btn" type="button" id="generateChatBtn">СГЕНЕРИРОВАТЬ</button>
+      <button class="secondary-btn" type="button" data-close="createModal">ОТМЕНА</button>
+    </div>
+
+    <div class="result-box" id="createResult">
+      <div class="result-label">ССЫЛКА ДЛЯ ВХОДА</div>
+      <input class="result-link" id="chatLinkOutput" readonly>
+      <div class="row" style="margin-top:12px">
+        <button class="primary-btn" type="button" id="copyLinkBtn">КОПИРОВАТЬ</button>
+        <button class="secondary-btn" type="button" id="openLinkBtn">ОТКРЫТЬ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="joinModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div class="modal-title">ВХОД В ЧАТ</div>
+      <button class="close-btn" type="button" data-close="joinModal">✕</button>
+    </div>
+    <div class="modal-text">Вставь ссылку-приглашение или идентификатор комнаты. Если чат защищён, пароль вводится уже при входе в комнату.</div>
+
+    <div class="field">
+      <label class="label" for="joinNick">ТВОЙ НИК</label>
+      <input class="input" id="joinNick" type="text" placeholder="например, shadow" maxlength="32">
+    </div>
+
+    <div class="field">
+      <label class="label" for="joinLink">ССЫЛКА ИЛИ ROOM ID</label>
+      <input class="input" id="joinLink" type="text" placeholder="https://... или room_xxxxx">
+    </div>
+
+    <div class="row">
+      <button class="primary-btn" type="button" id="joinChatBtn">ПРИСОЕДИНИТЬСЯ</button>
+      <button class="secondary-btn" type="button" data-close="joinModal">ОТМЕНА</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="generalModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div class="modal-title">ОБЩИЙ ЧАТ</div>
+      <button class="close-btn" type="button" data-close="generalModal">✕</button>
+    </div>
+    <div class="modal-text">В этот чат смогут зайти все. Укажи только ник и входи.</div>
+
+    <div class="field">
+      <label class="label" for="generalNick">ТВОЙ НИК</label>
+      <input class="input" id="generalNick" type="text" placeholder="например, user_01" maxlength="32">
+    </div>
+
+    <div class="row">
+      <button class="primary-btn" type="button" id="enterGeneralBtn">ВОЙТИ</button>
+      <button class="secondary-btn" type="button" data-close="generalModal">ОТМЕНА</button>
+    </div>
+  </div>
+</div>
+
+<div class="gate" id="gate">
+  <div class="gate-box">
+    <div class="gate-title">ЧАТ ЗАЩИЩЁН</div>
+    <div class="gate-text">Для входа нужен пароль комнаты.</div>
+    <input class="gate-input" id="gateInput" type="password" placeholder="Введи пароль">
+    <button class="gate-btn" id="gateBtn">ВОЙТИ</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">ССЫЛКА СКОПИРОВАНА</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+import {
+  getDatabase,
+  ref,
+  push,
+  onChildAdded,
+  query,
+  orderByChild,
+  limitToLast
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAeJonqPewz7jww12GUiZw4ppG4Zt-S9z0",
+  authDomain: "anonimuz-chat.firebaseapp.com",
+  databaseURL: "https://anonimuz-chat-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "anonimuz-chat",
+  storageBucket: "anonimuz-chat.firebasestorage.app",
+  messagingSenderId: "730811201452",
+  appId: "1:730811201452:web:c77de5a1c91cd3538dac09"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+const menuPage = document.getElementById('menuPage');
+const chatPage = document.getElementById('chatPage');
+const toast = document.getElementById('toast');
+const createModal = document.getElementById('createModal');
+const joinModal = document.getElementById('joinModal');
+const generalModal = document.getElementById('generalModal');
+const gate = document.getElementById('gate');
+const messagesEl = document.getElementById('messages');
+const loadingState = document.getElementById('loadingState');
+const inputEl = document.getElementById('messageInput');
+const sendBtn = document.getElementById('sendBtn');
+
+let currentUid = '';
+let authReady = false;
+let firstMessageArrived = false;
+let roomRef = null;
+let currentState = null;
+
+function showToast(text){
+  toast.textContent = text;
+  toast.classList.add('show');
+  clearTimeout(showToast.t);
+  showToast.t = setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, s => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[s]));
+}
+
+function nowTime(){
+  return new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+}
+
+function slugify(value){
+  return value.toLowerCase().trim().replace(/[^a-z0-9а-яё_-]+/gi,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+}
+
+function makeId(length=8){
+  const chars='abcdefghijklmnopqrstuvwxyz0123456789';
+  let out='';
+  for(let i=0;i<length;i++) out+=chars[Math.floor(Math.random()*chars.length)];
+  return out;
+}
+
+function encodePass(pass){
+  return btoa(unescape(encodeURIComponent(pass)));
+}
+
+function decodePass(val){
+  try { return decodeURIComponent(escape(atob(val))); } catch { return ''; }
+}
+
+function currentBaseUrl(){
+  return location.origin + location.pathname;
+}
+
+function switchToMenu(clearUrl = false){
+  menuPage.classList.remove('hidden');
+  chatPage.classList.add('hidden');
+  gate.classList.remove('show');
+  messagesEl.innerHTML = '<div class="loading" id="loadingState">ПОДКЛЮЧЕНИЕ К СЕРВЕРУ...</div>';
+  firstMessageArrived = false;
+  currentState = null;
+  roomRef = null;
+  if (clearUrl) {
+    history.replaceState({}, '', currentBaseUrl());
+  }
+}
+
+function switchToChat(){
+  menuPage.classList.add('hidden');
+  chatPage.classList.remove('hidden');
+}
+
+function updateChatUI(state){
+  document.getElementById('sidebarRoom').textContent = state.roomTitleText;
+  document.getElementById('sidebarNick').textContent = state.nick;
+  document.getElementById('roomTitle').textContent = state.roomTitleText.toUpperCase();
+  document.getElementById('roomIdLabel').textContent = state.room;
+  document.getElementById('nickLabel').textContent = state.nick;
+  document.getElementById('sidebarType').textContent =
+    state.room === 'general-chat' ? 'PUBLIC CHAT' : (state.locked ? 'PRIVATE + PASSWORD' : 'PRIVATE CHAT');
+}
+
+function appendMessage(item){
+  const loading = document.getElementById('loadingState');
+  if (loading) loading.remove();
+  const empty = messagesEl.querySelector('.empty');
+  if (empty) empty.remove();
+
+  const div = document.createElement('div');
+  div.className = 'msg' + (item.uid === currentUid ? ' self' : '');
+  div.innerHTML = `
+    <div class="msg-head">
+      <div class="msg-user">${escapeHtml(item.user || 'anon')}</div>
+      <div class="msg-time">${escapeHtml(item.time || '')}</div>
+    </div>
+    <div class="msg-text">${escapeHtml(item.text || '')}</div>
+    <div class="msg-status">${item.uid === currentUid ? 'ОТПРАВЛЕНО' : 'ПОЛУЧЕНО'}</div>
+  `;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  firstMessageArrived = true;
+}
+
+function showEmptyIfNeeded(){
+  const loading = document.getElementById('loadingState');
+  if (!firstMessageArrived && !messagesEl.querySelector('.empty')) {
+    if (loading) loading.remove();
+    messagesEl.innerHTML = '<div class="empty">КОМНАТА ОТКРЫТА · СООБЩЕНИЙ ПОКА НЕТ</div>';
+  }
+}
+
+function getStateFromUrl(){
+  const params = new URLSearchParams(location.search);
+  const room = params.get('room');
+  if (!room) return null;
+
+  return {
+    room,
+    nick: params.get('nick') || 'ghost',
+    customTitle: params.get('title'),
+    locked: params.get('lock') === '1',
+    passEncoded: params.get('p') || '',
+    roomTitleText: params.get('title') || (room === 'general-chat' ? 'Общий чат' : room)
+  };
+}
+
+function buildInviteUrl(state, nickOverride = null){
+  const url = new URL(currentBaseUrl());
+  url.searchParams.set('room', state.room);
+  url.searchParams.set('nick', nickOverride || state.nick);
+  if (state.customTitle) url.searchParams.set('title', state.customTitle);
+  if (state.locked) {
+    url.searchParams.set('lock', '1');
+    url.searchParams.set('p', state.passEncoded);
+  }
+  return url.toString();
+}
+
+async function copyInvite(){
+  if (!currentState) return;
+  const inviteUrl = new URL(buildInviteUrl(currentState));
+  inviteUrl.searchParams.delete('nick');
+  const invite = inviteUrl.toString();
+
+  try {
+    await navigator.clipboard.writeText(invite);
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = invite;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+  }
+  showToast('ССЫЛКА СКОПИРОВАНА');
+}
+
+async function ensureAuth(){
+  if (authReady) return true;
+  try {
+    const cred = await signInAnonymously(auth);
+    currentUid = cred.user.uid;
+    authReady = true;
+    return true;
+  } catch (e) {
+    console.error(e);
+    showToast('ОШИБКА ВХОДА FIREBASE');
+    return false;
+  }
+}
+
+function setupGateIfNeeded(state){
+  gate.classList.remove('show');
+  if (!state.locked) return;
+
+  gate.classList.add('show');
+  document.getElementById('gateInput').value = '';
+}
+
+function attachRealtime(state){
+  roomRef = ref(db, `rooms/${state.room}/messages`);
+  const roomQuery = query(roomRef, orderByChild('ts'), limitToLast(100));
+
+  firstMessageArrived = false;
+  messagesEl.innerHTML = '<div class="loading" id="loadingState">ПОДКЛЮЧЕНИЕ К СЕРВЕРУ...</div>';
+  setTimeout(showEmptyIfNeeded, 2000);
+
+  onChildAdded(roomQuery, (snapshot) => {
+    const item = snapshot.val();
+    appendMessage(item || {});
+  });
+}
+
+async function openChatFromState(state, pushHist = false){
+  currentState = state;
+  switchToChat();
+  updateChatUI(state);
+  setupGateIfNeeded(state);
+
+  if (pushHist) {
+    history.pushState({}, '', buildInviteUrl(state));
+  }
+
+  const ok = await ensureAuth();
+  if (!ok) return;
+  attachRealtime(state);
+}
+
+async function sendMessage(){
+  const text = inputEl.value.trim();
+  if (!text || !currentState || !roomRef) return;
+
+  if (!authReady) {
+    showToast('СОЕДИНЕНИЕ ЕЩЁ НЕ ГОТОВО');
+    return;
+  }
+  if (currentState.locked && gate.classList.contains('show')) {
+    showToast('СНАЧАЛА ВВЕДИ ПАРОЛЬ');
+    return;
+  }
+
+  try {
+    await push(roomRef, {
+      user: currentState.nick,
+      text,
+      time: nowTime(),
+      ts: Date.now(),
+      uid: currentUid
+    });
+    inputEl.value = '';
+  } catch (e) {
+    console.error(e);
+    showToast('ОШИБКА ОТПРАВКИ');
+  }
+}
+
+/* MENU ACTIONS */
+document.getElementById('openCreateBtn').addEventListener('click',()=>createModal.classList.add('open'));
+document.getElementById('openJoinBtn').addEventListener('click',()=>joinModal.classList.add('open'));
+document.getElementById('openGeneralBtn').addEventListener('click',()=>generalModal.classList.add('open'));
+document.getElementById('supportBtn').addEventListener('click',()=>showToast('ПОДДЕРЖКА БУДЕТ СЛЕДУЮЩИМ ШАГОМ'));
+
+document.querySelectorAll('[data-close]').forEach(btn=>{
+  btn.addEventListener('click',()=>document.getElementById(btn.dataset.close).classList.remove('open'));
+});
+
+[createModal,joinModal,generalModal].forEach(modal=>{
+  modal.addEventListener('click',(e)=>{ if(e.target===modal) modal.classList.remove('open'); });
+});
+
+document.addEventListener('keydown',(e)=>{
+  if(e.key==='Escape'){
+    createModal.classList.remove('open');
+    joinModal.classList.remove('open');
+    generalModal.classList.remove('open');
+  }
+});
+
+document.getElementById('needPassword').addEventListener('change',(e)=>{
+  document.getElementById('passwordWrap').classList.toggle('show', e.target.checked);
+});
+
+document.getElementById('generateChatBtn').addEventListener('click',()=>{
+  const nick=document.getElementById('createNick').value.trim();
+  const roomName=document.getElementById('createRoomName').value.trim();
+  const needPass=document.getElementById('needPassword').checked;
+  const pass=document.getElementById('createPassword').value;
+
+  if(!nick){
+    showToast('ВВЕДИ НИК');
+    document.getElementById('createNick').focus();
+    return;
+  }
+  if(needPass && !pass){
+    showToast('ВВЕДИ ПАРОЛЬ');
+    document.getElementById('createPassword').focus();
+    return;
+  }
+
+  const safeRoom=slugify(roomName || 'private-chat');
+  const roomId=`${safeRoom}-${makeId(8)}`;
+  const state = {
+    room: roomId,
+    nick,
+    customTitle: roomName || null,
+    locked: needPass,
+    passEncoded: needPass ? encodePass(pass) : '',
+    roomTitleText: roomName || roomId
+  };
+
+  document.getElementById('chatLinkOutput').value = buildInviteUrl(state);
+  document.getElementById('createResult').classList.add('show');
+});
+
+document.getElementById('copyLinkBtn').addEventListener('click',async()=>{
+  const output=document.getElementById('chatLinkOutput');
+  if(!output.value) return;
+  try{ await navigator.clipboard.writeText(output.value); }
+  catch{ output.select(); document.execCommand('copy'); }
+  showToast('ССЫЛКА СКОПИРОВАНА');
+});
+
+document.getElementById('openLinkBtn').addEventListener('click',()=>{
+  const link=document.getElementById('chatLinkOutput').value;
+  if(link) location.href = link;
+});
+
+document.getElementById('joinChatBtn').addEventListener('click',()=>{
+  const nick=document.getElementById('joinNick').value.trim();
+  const raw=document.getElementById('joinLink').value.trim();
+
+  if(!nick){
+    showToast('ВВЕДИ НИК');
+    document.getElementById('joinNick').focus();
+    return;
+  }
+  if(!raw){
+    showToast('ВСТАВЬ ССЫЛКУ ИЛИ ROOM ID');
+    document.getElementById('joinLink').focus();
+    return;
+  }
+
+  let state;
+  if(/^https?:\/\//i.test(raw) || raw.startsWith('file:///')){
+    try{
+      const url=new URL(raw);
+      const params = url.searchParams;
+      const room = params.get('room');
+      if (!room) throw new Error('no room');
+
+      state = {
+        room,
+        nick,
+        customTitle: params.get('title'),
+        locked: params.get('lock') === '1',
+        passEncoded: params.get('p') || '',
+        roomTitleText: params.get('title') || (room === 'general-chat' ? 'Общий чат' : room)
+      };
+    }catch{
+      showToast('НЕВЕРНАЯ ССЫЛКА');
+      return;
+    }
+  }else{
+    state = {
+      room: raw,
+      nick,
+      customTitle: null,
+      locked: false,
+      passEncoded: '',
+      roomTitleText: raw
+    };
+  }
+
+  joinModal.classList.remove('open');
+  openChatFromState(state, true);
+});
+
+document.getElementById('enterGeneralBtn').addEventListener('click',()=>{
+  const nick=document.getElementById('generalNick').value.trim();
+  if(!nick){
+    showToast('ВВЕДИ НИК');
+    document.getElementById('generalNick').focus();
+    return;
+  }
+  generalModal.classList.remove('open');
+  openChatFromState({
+    room:'general-chat',
+    nick,
+    customTitle:'Общий чат',
+    locked:false,
+    passEncoded:'',
+    roomTitleText:'Общий чат'
+  }, true);
+});
+
+/* CHAT ACTIONS */
+document.getElementById('copyInviteBtn').addEventListener('click', copyInvite);
+document.getElementById('copyTopBtn').addEventListener('click', copyInvite);
+document.getElementById('backBtn').addEventListener('click', () => switchToMenu(true));
+document.getElementById('leaveBtn').addEventListener('click', () => switchToMenu(true));
+
+sendBtn.addEventListener('click', sendMessage);
+inputEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') sendMessage();
+});
+
+document.getElementById('gateBtn').addEventListener('click', () => {
+  if (!currentState) return;
+  const entered = document.getElementById('gateInput').value;
+  if (entered === decodePass(currentState.passEncoded)) {
+    gate.classList.remove('show');
+    showToast('ДОСТУП РАЗРЕШЁН');
+  } else {
+    showToast('НЕВЕРНЫЙ ПАРОЛЬ');
+  }
+});
+document.getElementById('gateInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('gateBtn').click();
+});
+
+/* LOGOS */
+function bindLogo(imgId, fallbackId){
+  const img = document.getElementById(imgId);
+  img.addEventListener('error', () => {
+    img.style.display = 'none';
+    document.getElementById(fallbackId).style.display = 'flex';
+  });
+}
+bindLogo('menuLogoImage','menuLogoFallback');
+bindLogo('chatLogoImage','chatLogoFallback');
+
+/* MATRIX */
+const canvas = document.getElementById('matrix');
+const ctx = canvas.getContext('2d');
+const fs = 14;
+let W, H, cols, drops;
+
+function initMatrix(){
+  W = canvas.width = innerWidth;
+  H = canvas.height = innerHeight;
+  cols = Math.floor(W / fs);
+  drops = Array.from({length: cols}, () => Math.random() * -(H / fs));
+}
+initMatrix();
+addEventListener('resize', initMatrix);
+
+function drawMatrix(){
+  ctx.fillStyle = 'rgba(0,0,0,0.045)';
+  ctx.fillRect(0,0,W,H);
+  ctx.font = fs + 'px Share Tech Mono';
+  for(let i=0;i<cols;i++){
+    const y = drops[i] * fs;
+    const r = Math.random();
+    ctx.fillStyle = r > 0.97 ? '#ffffff' : r > 0.6 ? '#00ff41' : '#005515';
+    ctx.fillText(Math.random() > 0.5 ? '1' : '0', i * fs, y);
+    if(y > H && Math.random() > 0.975) drops[i] = 0;
+    drops[i] += 0.45;
+  }
+}
+setInterval(drawMatrix, 40);
+
+/* INIT */
+const initialState = getStateFromUrl();
+if (initialState) {
+  openChatFromState(initialState, false);
+} else {
+  switchToMenu(false);
+}
+</script>
+</body>
+</html>

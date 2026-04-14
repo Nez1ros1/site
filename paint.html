@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Доска для занятий</title>
+<style>
+body { font-family: Arial; margin:0; background:#f5f5f5; }
+#topbar { padding:10px; background:#333; color:#fff; display:flex; gap:10px; align-items:center; }
+button { padding:6px 10px; cursor:pointer; }
+#boards { display:flex; gap:10px; padding:10px; flex-wrap:wrap; }
+.board-link { background:#fff; padding:8px; border-radius:6px; }
+canvas { background:#fff; display:block; margin:10px auto; border:1px solid #ccc; }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+<button onclick="createBoard()">Создать доску</button>
+<button onclick="setTool('draw')">Карандаш</button>
+<button onclick="setTool('erase')">Ластик</button>
+<span id="info"></span>
+</div>
+
+<div id="boards"></div>
+<canvas id="canvas" width="800" height="500"></canvas>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let drawing = false;
+let tool = 'draw';
+let currentBoard = null;
+
+function setTool(t){ tool = t; }
+
+canvas.addEventListener('mousedown', ()=> drawing = true);
+canvas.addEventListener('mouseup', ()=> {
+ drawing = false;
+ saveBoard();
+});
+canvas.addEventListener('mousemove', draw);
+
+function draw(e){
+ if(!drawing) return;
+ const rect = canvas.getBoundingClientRect();
+ const x = e.clientX - rect.left;
+ const y = e.clientY - rect.top;
+
+ if(tool === 'draw'){
+ ctx.fillStyle = 'black';
+ ctx.beginPath();
+ ctx.arc(x,y,3,0,Math.PI*2);
+ ctx.fill();
+ } else {
+ ctx.clearRect(x-5,y-5,10,10);
+ }
+}
+
+function createBoard(){
+ let boards = JSON.parse(localStorage.getItem('boards') || '[]');
+ if(boards.length >= 5){
+ alert('Максимум 5 досок');
+ return;
+ }
+ const id = Date.now();
+ boards.push(id);
+ localStorage.setItem('boards', JSON.stringify(boards));
+ renderBoards();
+}
+
+function renderBoards(){
+ const boardsDiv = document.getElementById('boards');
+ boardsDiv.innerHTML = '';
+ let boards = JSON.parse(localStorage.getItem('boards') || '[]');
+
+ boards.forEach(id=>{
+ const div = document.createElement('div');
+ div.className = 'board-link';
+ const link = location.origin + location.pathname + '?board=' + id;
+ div.innerHTML = `
+ <div>Доска ${id}</div>
+ <a href="${link}" target="_blank">Открыть</a>
+ `;
+ boardsDiv.appendChild(div);
+ });
+}
+
+function loadBoard(id){
+ currentBoard = id;
+ const data = localStorage.getItem('board_'+id);
+ if(data){
+ const img = new Image();
+ img.onload = ()=> ctx.drawImage(img,0,0);
+ img.src = data;
+ }
+ document.getElementById('info').innerText = 'Текущая доска: ' + id;
+}
+
+function saveBoard(){
+ if(!currentBoard) return;
+ const data = canvas.toDataURL();
+ localStorage.setItem('board_'+currentBoard, data);
+}
+
+// init
+const params = new URLSearchParams(location.search);
+const boardId = params.get('board');
+
+renderBoards();
+
+if(boardId){
+ loadBoard(boardId);
+}
+</script>
+
+</body>
+</html>

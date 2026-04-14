@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSGR - Вход и Регистрация</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #5c63f5;
+            --primary-hover: #4a4fd1;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6c757d;
+            --text-tertiary: #adb5bd;
+            --border-color: #dee2e6;
+            --error-color: #dc3545;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        html.dark-theme {
+            --primary-color: #6b75ff;
+            --primary-hover: #5a63dd;
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #3a3a3a;
+            --text-primary: #ffffff;
+            --text-secondary: #b8bcc4;
+            --text-tertiary: #808992;
+            --border-color: #404040;
+            --error-color: #ff6b6b;
+            --success-color: #51cf66;
+            --warning-color: #ffd93d;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--bg-primary);
+            box-shadow: var(--shadow);
+            padding: 1.5rem 2rem;
+            position: relative;
+        }
+
+        .header-container {
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+        }
+
+        .theme-toggle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow);
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .container {
+            background-color: var(--bg-primary);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            max-width: 400px;
+            width: 100%;
+            padding: 2.5rem 2rem;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            margin-bottom: -2px;
+        }
+
+        .tab-button.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-button:hover:not(.active) {
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(92, 99, 245, 0.1);
+        }
+
+        input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.85rem;
+            margin-top: 0.35rem;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group.error input {
+            border-color: var(--error-color);
+            background-color: rgba(220, 53, 69, 0.05);
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .submit-button:active {
+            transform: translateY(0);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            max-width: 400px;
+            z-index: 1000;
+            animation: slideInRight 0.3s ease;
+            display: none;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .notification.success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .notification.error {
+            background-color: var(--error-color);
+            color: white;
+        }
+
+        .notification.info {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .text-center {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 2rem 1.5rem;
+                border-radius: 16px;
+            }
+
+            .tabs {
+                gap: 0.5rem;
+            }
+
+            .tab-button {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.95rem;
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            .notification {
+                right: 1rem;
+                left: 1rem;
+                max-width: none;
+            }
+        }
+
+        @media (max-height: 600px) {
+            main {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">MSGR</div>
+            <button class="theme-toggle" id="themeToggle" aria-label="Переключить тему">☀️</button>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="tabs">
+                <button class="tab-button active" data-tab="login">Вход</button>
+                <button class="tab-button" data-tab="register">Регистрация</button>
+            </div>
+
+            <form id="loginForm" class="form-section active">
+                <div class="form-group">
+                    <label for="loginUsername">Username</label>
+                    <input
+                        type="text"
+                        id="loginUsername"
+                        placeholder="Введите ваш логин"
+                        required
+                    />
+                    <div class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Пароль</label>
+                    <input
+                        type="password"
+                        id="loginPassword"
+                        placeholder="Введите пароль"
+                        required
+                    />
+                    <div class="error-message"></div>
+                </div>
+
+                <button type="submit" class="submit-button">Войти</button>
+            </form>
+
+            <form id="registerForm" class="form-section">
+                <div class="form-group">
+                    <label for="registerName">Отображаемое имя</label>
+                    <input
+                        type="text"
+                        id="registerName"
+                        placeholder="Ваше имя"
+                        required
+                    />
+                    <div class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerUsername">Username</label>
+                    <input
+                        type="text"
+                        id="registerUsername"
+                        placeholder="Выберите логин"
+                        required
+                    />
+                    <div class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPassword">Пароль</label>
+                    <input
+                        type="password"
+                        id="registerPassword"
+                        placeholder="Создайте пароль"
+                        required
+                    />
+                    <div class="error-message"></div>
+                </div>
+
+                <button type="submit" class="submit-button">Зарегистрироваться</button>
+            </form>
+        </div>
+    </main>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        class MSGRAuth {
+            constructor() {
+                this.initTheme();
+                this.attachEventListeners();
+            }
+
+            initTheme() {
+                const savedTheme = localStorage.getItem('msgr_theme') || 'light';
+                this.setTheme(savedTheme);
+            }
+
+            setTheme(theme) {
+                const isDark = theme === 'dark';
+                const html = document.documentElement;
+                
+                if (isDark) {
+                    html.classList.add('dark-theme');
+                } else {
+                    html.classList.remove('dark-theme');
+                }
+                
+                const icon = document.getElementById('themeToggle');
+                icon.textContent = isDark ? '🌙' : '☀️';
+                
+                localStorage.setItem('msgr_theme', theme);
+            }
+
+            attachEventListeners() {
+                document.getElementById('themeToggle').addEventListener('click', () => {
+                    const currentTheme = localStorage.getItem('msgr_theme') || 'light';
+                    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                    this.setTheme(newTheme);
+                });
+
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
+                });
+
+                document.getElementById('loginForm').addEventListener('submit', (e) => this.handleLogin(e));
+                document.getElementById('registerForm').addEventListener('submit', (e) => this.handleRegister(e));
+
+                document.getElementById('loginUsername').addEventListener('input', () => {
+                    this.clearError('loginUsername');
+                });
+                document.getElementById('loginPassword').addEventListener('input', () => {
+                    this.clearError('loginPassword');
+                });
+                document.getElementById('registerName').addEventListener('input', () => {
+                    this.clearError('registerName');
+                });
+                document.getElementById('registerUsername').addEventListener('input', () => {
+                    this.clearError('registerUsername');
+                });
+                document.getElementById('registerPassword').addEventListener('input', () => {
+                    this.clearError('registerPassword');
+                });
+            }
+
+            switchTab(tab) {
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelectorAll('.form-section').forEach(form => {
+                    form.classList.remove('active');
+                });
+
+                event.target.classList.add('active');
+                document.getElementById(tab === 'login' ? 'loginForm' : 'registerForm').classList.add('active');
+            }
+
+            validateUsername(username) {
+                if (!username) {
+                    return { valid: false, message: 'Username не может быть пустым' };
+                }
+                if (username.length < 3) {
+                    return { valid: false, message: 'Username должен содержать минимум 3 символа' };
+                }
+                if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+                    return { valid: false, message: 'Username может содержать только буквы, цифры, подчеркивание и дефис' };
+                }
+                return { valid: true };
+            }
+
+            validatePassword(password) {
+                if (!password) {
+                    return { valid: false, message: 'Пароль не может быть пустым' };
+                }
+                if (password.length < 4) {
+                    return { valid: false, message: 'Пароль должен содержать минимум 4 символа' };
+                }
+                return { valid: true };
+            }
+
+            validateDisplayName(name) {
+                if (!name || name.trim() === '') {
+                    return { valid: false, message: 'Имя не может быть пустым' };
+                }
+                if (name.trim().length < 2) {
+                    return { valid: false, message: 'Имя должно содержать минимум 2 символа' };
+                }
+                return { valid: true };
+            }
+
+            setError(fieldId, message) {
+                const field = document.getElementById(fieldId);
+                const errorElement = field.parentElement.querySelector('.error-message');
+                field.parentElement.classList.add('error');
+                errorElement.textContent = message;
+                errorElement.classList.add('show');
+            }
+
+            clearError(fieldId) {
+                const field = document.getElementById(fieldId);
+                const errorElement = field.parentElement.querySelector('.error-message');
+                field.parentElement.classList.remove('error');
+                errorElement.classList.remove('show');
+            }
+
+            showNotification(message, type = 'info') {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.className = `notification ${type} show`;
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+
+            handleLogin(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('loginUsername').value.trim().replace('@', '');
+                const password = document.getElementById('loginPassword').value;
+
+                let isValid = true;
+
+                const usernameValidation = this.validateUsername(username);
+                if (!usernameValidation.valid) {
+                    this.setError('loginUsername', usernameValidation.message);
+                    isValid = false;
+                }
+
+                const passwordValidation = this.validatePassword(password);
+                if (!passwordValidation.valid) {
+                    this.setError('loginPassword', passwordValidation.message);
+                    isValid = false;
+                }
+
+                if (!isValid) return;
+
+                const users = JSON.parse(localStorage.getItem('msgr_users') || '[]');
+                const user = users.find(u => u.username === username);
+
+                if (!user) {
+                    this.setError('loginUsername', 'Пользователь не найден');
+                    this.showNotification('Ошибка: пользователь не найден', 'error');
+                    return;
+                }
+
+                if (user.password !== password) {
+                    this.setError('loginPassword', 'Неверный пароль');
+                    this.showNotification('Ошибка: неверный пароль', 'error');
+                    return;
+                }
+
+                localStorage.setItem('msgr_auth_user', JSON.stringify({
+                    username: user.username,
+                    displayName: user.displayName,
+                    role: user.role || 'user'
+                }));
+
+                this.showNotification(`Добро пожаловать, ${user.displayName}!`, 'success');
+                setTimeout(() => {
+                    window.location.href = 'chat.html';
+                }, 500);
+            }
+
+            handleRegister(e) {
+                e.preventDefault();
+
+                const displayName = document.getElementById('registerName').value.trim();
+                const username = document.getElementById('registerUsername').value.trim().replace('@', '');
+                const password = document.getElementById('registerPassword').value;
+
+                let isValid = true;
+
+                const nameValidation = this.validateDisplayName(displayName);
+                if (!nameValidation.valid) {
+                    this.setError('registerName', nameValidation.message);
+                    isValid = false;
+                }
+
+                const usernameValidation = this.validateUsername(username);
+                if (!usernameValidation.valid) {
+                    this.setError('registerUsername', usernameValidation.message);
+                    isValid = false;
+                }
+
+                const passwordValidation = this.validatePassword(password);
+                if (!passwordValidation.valid) {
+                    this.setError('registerPassword', passwordValidation.message);
+                    isValid = false;
+                }
+
+                if (!isValid) return;
+
+                const users = JSON.parse(localStorage.getItem('msgr_users') || '[]');
+
+                if (users.some(u => u.username === username)) {
+                    this.setError('registerUsername', 'Этот username уже занят');
+                    this.showNotification('Ошибка: username уже зарегистрирован', 'error');
+                    return;
+                }
+
+                const newUser = {
+                    username: username,
+                    displayName: displayName,
+                    password: password,
+                    role: username === 'admin' ? 'admin' : 'user',
+                    createdAt: new Date().toISOString()
+                };
+
+                users.push(newUser);
+                localStorage.setItem('msgr_users', JSON.stringify(users));
+
+                localStorage.setItem('msgr_auth_user', JSON.stringify({
+                    username: newUser.username,
+                    displayName: newUser.displayName,
+                    role: newUser.role
+                }));
+
+                this.showNotification(`Добро пожаловать, ${displayName}!`, 'success');
+                setTimeout(() => {
+                    window.location.href = 'chat.html';
+                }, 500);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new MSGRAuth();
+        });
+    </script>
+</body>
+</html>

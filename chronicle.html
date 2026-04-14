@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chroniclea — исторические статьи</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background-color: #fafafa;
+            color: #2c2c2c;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background-color: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 2rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .site-title {
+            font-size: 1.8rem;
+            font-weight: 400;
+            letter-spacing: 0.05em;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .site-title:hover {
+            color: #666;
+        }
+
+        .publish-btn-header {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #2c2c2c;
+            color: white;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            padding: 0;
+            outline: none;
+        }
+
+        .publish-btn-header:hover {
+            background-color: #1a1a1a;
+        }
+
+        .publish-btn-header.hidden {
+            display: none;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .user-info {
+            font-size: 0.9rem;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Buttons */
+        button {
+            background-color: white;
+            border: 1px solid #d0d0d0;
+            padding: 0.6rem 1.2rem;
+            cursor: pointer;
+            font-family: 'Inter', -apple-system, sans-serif;
+            font-size: 0.95rem;
+            color: #333;
+            transition: all 0.2s;
+            border-radius: 2px;
+            outline: none;
+        }
+
+        button:hover {
+            border-color: #999;
+            background-color: #f5f5f5;
+        }
+
+        button:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        button.primary {
+            background-color: #2c2c2c;
+            color: white;
+            border-color: #2c2c2c;
+        }
+
+        button.primary:hover {
+            background-color: #1a1a1a;
+            border-color: #1a1a1a;
+        }
+
+        button.danger {
+            color: #d32f2f;
+            border-color: #d32f2f;
+        }
+
+        button.danger:hover {
+            background-color: #ffebee;
+        }
+
+        button.success {
+            color: #388e3c;
+            border-color: #388e3c;
+        }
+
+        button.success:hover {
+            background-color: #e8f5e9;
+        }
+
+        /* Main container */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+
+        /* Home page */
+        .search-box {
+            margin-bottom: 2.5rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #d0d0d0;
+            font-family: 'Georgia', serif;
+            font-size: 1rem;
+            border-radius: 2px;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #999;
+        }
+
+        .articles-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .article-card {
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            padding: 1.5rem;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .article-card:hover {
+            border-color: #999;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .article-title {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        .article-meta {
+            font-size: 0.85rem;
+            color: #999;
+            display: flex;
+            gap: 1rem;
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Article page */
+        .article-header {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 1.5rem;
+        }
+
+        .article-content {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin-bottom: 2rem;
+        }
+
+        .back-button {
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #d0d0d0;
+            font-family: 'Georgia', serif;
+            font-size: 1rem;
+            border-radius: 2px;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #999;
+            box-shadow: none;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 300px;
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: #1a1a1a;
+        }
+
+        /* Pages */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Admin panel */
+        .moderation-item {
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 2px;
+        }
+
+        .moderation-item-header {
+            margin-bottom: 1rem;
+        }
+
+        .moderation-item-title {
+            font-size: 1.2rem;
+            margin-bottom: 0.3rem;
+            color: #1a1a1a;
+        }
+
+        .moderation-item-author {
+            font-size: 0.9rem;
+            color: #666;
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+
+        .moderation-item-preview {
+            color: #666;
+            font-size: 0.95rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background-color: #fafafa;
+            border-left: 3px solid #d0d0d0;
+            max-height: 200px;
+            overflow: hidden;
+        }
+
+        .moderation-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 2px;
+            font-size: 0.8rem;
+            font-family: 'Inter', -apple-system, sans-serif;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        .status-pending {
+            background-color: #fff3e0;
+            color: #f57c00;
+        }
+
+        .status-approved {
+            background-color: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .status-rejected {
+            background-color: #ffebee;
+            color: #d32f2f;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 2px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .modal-header {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            width: auto;
+            padding: 0;
+            outline: none;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        /* Login page */
+        .login-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .login-tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 0.95rem;
+            color: #999;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            font-family: 'Georgia', serif;
+            outline: none;
+        }
+
+        .login-tab.active {
+            color: #2c2c2c;
+            border-bottom-color: #2c2c2c;
+        }
+
+        .login-tab:hover {
+            color: #666;
+        }
+
+        .login-form-group {
+            display: none;
+        }
+
+        .login-form-group.active {
+            display: block;
+        }
+
+        .login-form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #d0d0d0;
+            font-family: 'Georgia', serif;
+            font-size: 1rem;
+            border-radius: 2px;
+            margin-bottom: 1rem;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        .login-form-group input:focus {
+            outline: none;
+            border-color: #999;
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: #1a1a1a;
+        }
+
+        /* Messages */
+        .message {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 2px;
+            font-size: 0.95rem;
+        }
+
+        .message.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-left: 3px solid #388e3c;
+        }
+
+        .message.error {
+            background-color: #ffebee;
+            color: #c62828;
+            border-left: 3px solid #d32f2f;
+        }
+
+        .message.info {
+            background-color: #e3f2fd;
+            color: #1565c0;
+            border-left: 3px solid #2196f3;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .header-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .site-title {
+                font-size: 1.4rem;
+            }
+
+            .header-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+
+            main {
+                padding: 1.5rem 1rem;
+            }
+
+            .moderation-buttons {
+                flex-direction: column;
+            }
+
+            .moderation-buttons button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="header-left">
+                <button class="publish-btn-header hidden" id="publishBtnHeader" onclick="openPublishModal()" title="Опубликовать статью">+</button>
+                <div class="site-title" onclick="goHome()">Chroniclea</div>
+            </div>
+            <div class="header-buttons" id="headerButtons">
+                <button onclick="openLoginModal()">Вход</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Home Page -->
+        <div class="page active" id="homePage">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Поиск по названиям статей..."
+                    onkeyup="filterArticles()"
+                >
+            </div>
+            <div class="articles-list" id="articlesList"></div>
+        </div>
+
+        <!-- Article Page -->
+        <div class="page" id="articlePage">
+            <button class="back-button" onclick="goHome()">← Назад</button>
+            <div class="article-header">
+                <h1 id="articleTitle"></h1>
+                <div class="article-meta">
+                    <span>Автор: <strong id="articleAuthor"></strong></span>
+                    <span>Опубликовано: <strong id="articleDate"></strong></span>
+                </div>
+            </div>
+            <div class="article-content" id="articleContent"></div>
+        </div>
+
+        <!-- Submit Article Page -->
+        <div class="page" id="submitPage">
+            <h2 class="form-title">Отправить статью на проверку</h2>
+            <div class="form-group">
+                <label for="submitTitle">Название статьи</label>
+                <input type="text" id="submitTitle" placeholder="Введите название">
+            </div>
+            <div class="form-group">
+                <label for="submitAuthor">Имя автора</label>
+                <input type="text" id="submitAuthor" placeholder="Ваше имя">
+            </div>
+            <div class="form-group">
+                <label for="submitText">Текст статьи</label>
+                <textarea id="submitText" placeholder="Напишите вашу статью..."></textarea>
+            </div>
+            <button class="primary" onclick="submitArticle()">Отправить на проверку</button>
+        </div>
+
+        <!-- Admin Panel -->
+        <div class="page" id="adminPage">
+            <h2 class="form-title">Панель модерации</h2>
+            <div style="margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                <button onclick="filterModerationList('pending')" class="primary">Ожидают проверки</button>
+                <button onclick="filterModerationList('approved')">Одобрены</button>
+                <button onclick="filterModerationList('rejected')">Отклонены</button>
+                <button onclick="filterModerationList('all')">Все</button>
+            </div>
+            <div id="moderationList"></div>
+        </div>
+    </main>
+
+    <!-- Login/Register Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeLoginModal()">✕</button>
+            <div class="login-tabs">
+                <button class="login-tab active" onclick="switchLoginTab('login')">Вход</button>
+                <button class="login-tab" onclick="switchLoginTab('register')">Регистрация</button>
+            </div>
+
+            <!-- Login Form -->
+            <div class="login-form-group active" id="loginForm">
+                <h2 class="login-title">Вход в аккаунт</h2>
+                <input type="text" id="loginUsername" placeholder="Логин" required>
+                <input type="password" id="loginPassword" placeholder="Пароль" required>
+                <button class="primary" style="width: 100%; margin-top: 1rem;" onclick="handleLogin()">Войти</button>
+            </div>
+
+            <!-- Register Form -->
+            <div class="login-form-group" id="registerForm">
+                <h2 class="login-title">Создать аккаунт</h2>
+                <input type="text" id="registerUsername" placeholder="Придумайте логин" required>
+                <input type="password" id="registerPassword" placeholder="Пароль" required>
+                <input type="password" id="registerPasswordConfirm" placeholder="Повторите пароль" required>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal;">
+                        <input type="radio" name="role" value="author" checked> Я автор
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal;">
+                        <input type="radio" name="role" value="reader"> Я только читаю
+                    </label>
+                </div>
+                <button class="primary" style="width: 100%; margin-top: 1rem;" onclick="handleRegister()">Создать аккаунт</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Article Modal (for admin view) -->
+    <div class="modal" id="articleModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeArticleModal()">✕</button>
+            <h2 id="modalArticleTitle"></h2>
+            <div class="article-meta" style="margin-bottom: 1.5rem;">
+                <span>Автор: <strong id="modalArticleAuthor"></strong></span>
+                <span>Отправлено: <strong id="modalArticleDate"></strong></span>
+            </div>
+            <div id="modalArticleContent" style="margin-bottom: 1.5rem; white-space: pre-wrap; word-wrap: break-word;"></div>
+            <div id="modalArticleActions"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data storage
+        const data = {
+            currentUser: null,
+            users: {},
+            articles: [],
+            nextId: 1
+        };
+
+        // Page management
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function goHome() {
+            showPage('homePage');
+            renderArticles();
+        }
+
+        // Login Modal
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.add('active');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.remove('active');
+        }
+
+        function switchLoginTab(tab) {
+            document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.login-form-group').forEach(f => f.classList.remove('active'));
+            
+            if (tab === 'login') {
+                document.querySelector('.login-tab:nth-child(1)').classList.add('active');
+                document.getElementById('loginForm').classList.add('active');
+            } else {
+                document.querySelector('.login-tab:nth-child(2)').classList.add('active');
+                document.getElementById('registerForm').classList.add('active');
+            }
+        }
+
+        function handleLogin() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            if (!username || !password) {
+                showMessage('Заполните логин и пароль', 'error');
+                return;
+            }
+
+            if (data.users[username] && data.users[username].password === password) {
+                data.currentUser = { username, role: data.users[username].role };
+                updateHeader();
+                closeLoginModal();
+                goHome();
+                showMessage(`Вы вошли как ${username}`, 'success');
+                document.getElementById('loginUsername').value = '';
+                document.getElementById('loginPassword').value = '';
+            } else {
+                showMessage('Неверный логин или пароль', 'error');
+            }
+        }
+
+        function handleRegister() {
+            const username = document.getElementById('registerUsername').value.trim();
+            const password = document.getElementById('registerPassword').value.trim();
+            const passwordConfirm = document.getElementById('registerPasswordConfirm').value.trim();
+            const role = document.querySelector('input[name="role"]:checked').value;
+
+            if (!username || !password || !passwordConfirm) {
+                showMessage('Заполните все поля', 'error');
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                showMessage('Пароли не совпадают', 'error');
+                return;
+            }
+
+            if (password.length < 4) {
+                showMessage('Пароль должен быть минимум 4 символа', 'error');
+                return;
+            }
+
+            if (data.users[username]) {
+                showMessage('Пользователь с таким логином уже существует', 'error');
+                return;
+            }
+
+            const finalRole = Object.keys(data.users).length === 0 ? 'admin' : role;
+            data.users[username] = { password, role: finalRole };
+            
+            showMessage(`Аккаунт создан как ${finalRole}!`, 'success');
+            
+            document.getElementById('registerUsername').value = '';
+            document.getElementById('registerPassword').value = '';
+            document.getElementById('registerPasswordConfirm').value = '';
+            
+            setTimeout(() => {
+                switchLoginTab('login');
+                document.getElementById('loginUsername').value = username;
+                document.getElementById('loginPassword').focus();
+            }, 800);
+        }
+
+        function handleLogout() {
+            data.currentUser = null;
+            updateHeader();
+            goHome();
+            showMessage('Вы вышли из системы', 'info');
+        }
+
+        // Header update
+        function updateHeader() {
+            const headerButtons = document.getElementById('headerButtons');
+            const publishBtnHeader = document.getElementById('publishBtnHeader');
+
+            headerButtons.innerHTML = '';
+
+            if (data.currentUser) {
+                const role = data.users[data.currentUser.username].role;
+                const roleText = role === 'admin' ? 'Администратор' : role === 'author' ? 'Автор' : 'Читатель';
+                
+                headerButtons.innerHTML += `
+                    <span class="user-info">
+                        <span>${data.currentUser.username} <small>(${roleText})</small></span>
+                    </span>
+                `;
+
+                if (role === 'author' || role === 'admin') {
+                    publishBtnHeader.classList.remove('hidden');
+                } else {
+                    publishBtnHeader.classList.add('hidden');
+                }
+
+                if (role === 'admin') {
+                    headerButtons.innerHTML += `<button onclick="showPage('adminPage')">Модерация</button>`;
+                }
+
+                headerButtons.innerHTML += `<button onclick="handleLogout()">Выход</button>`;
+            } else {
+                headerButtons.innerHTML = `<button onclick="openLoginModal()">Вход</button>`;
+                publishBtnHeader.classList.add('hidden');
+            }
+        }
+
+        // Publish modal
+        function openPublishModal() {
+            showPage('submitPage');
+            // Автоматически заполняем имя автора текущим пользователем
+            if (data.currentUser) {
+                document.getElementById('submitAuthor').value = data.currentUser.username;
+            }
+        }
+
+        // Articles
+        function renderArticles(articlesToShow = null) {
+            const list = document.getElementById('articlesList');
+            const articles = articlesToShow || data.articles.filter(a => a.status === 'approved');
+
+            if (articles.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📚</div>
+                        <p>Статей пока нет</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = articles.map(article => `
+                <div class="article-card" onclick="viewArticle(${article.id})">
+                    <div class="article-title">${escapeHtml(article.title)}</div>
+                    <div class="article-meta">
+                        <span>Автор: ${escapeHtml(article.author)}</span>
+                        <span>${formatDate(article.date)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function viewArticle(id) {
+            const article = data.articles.find(a => a.id === id);
+            if (!article) return;
+
+            document.getElementById('articleTitle').textContent = article.title;
+            document.getElementById('articleAuthor').textContent = article.author;
+            document.getElementById('articleDate').textContent = formatDate(article.date);
+            document.getElementById('articleContent').textContent = article.text;
+            showPage('articlePage');
+        }
+
+        function filterArticles() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = data.articles.filter(a => 
+                a.status === 'approved' && a.title.toLowerCase().includes(search)
+            );
+            renderArticles(filtered);
+        }
+
+        // Submit article
+        function submitArticle() {
+            const title = document.getElementById('submitTitle').value.trim();
+            const author = document.getElementById('submitAuthor').value.trim();
+            const text = document.getElementById('submitText').value.trim();
+
+            if (!title) {
+                showMessage('Введите название статьи', 'error');
+                return;
+            }
+
+            if (!author) {
+                showMessage('Введите имя автора', 'error');
+                return;
+            }
+
+            if (!text) {
+                showMessage('Введите текст статьи', 'error');
+                return;
+            }
+
+            if (!data.currentUser) {
+                showMessage('Вы должны быть авторизованы', 'error');
+                return;
+            }
+
+            const role = data.users[data.currentUser.username].role;
+            
+            const newArticle = {
+                id: data.nextId++,
+                title,
+                author,
+                text,
+                date: new Date().toISOString().split('T')[0],
+                status: role === 'admin' ? 'approved' : 'pending'
+            };
+
+            data.articles.push(newArticle);
+
+            // Очищаем форму
+            document.getElementById('submitTitle').value = '';
+            document.getElementById('submitAuthor').value = data.currentUser.username;
+            document.getElementById('submitText').value = '';
+
+            if (role === 'admin') {
+                showMessage('Статья опубликована!', 'success');
+            } else {
+                showMessage('Статья отправлена на проверку администратору!', 'success');
+            }
+            
+            setTimeout(goHome, 1500);
+        }
+
+        // Admin moderation
+        let currentModerationFilter = 'pending';
+
+        function filterModerationList(status) {
+            currentModerationFilter = status;
+            renderModerationList();
+        }
+
+        function renderModerationList() {
+            const list = document.getElementById('moderationList');
+            let articles = data.articles;
+
+            if (currentModerationFilter !== 'all') {
+                articles = articles.filter(a => a.status === currentModerationFilter);
+            }
+
+            if (articles.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <p>Нет статей с выбранным статусом</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = articles.map(article => `
+                <div class="moderation-item">
+                    <div class="moderation-item-header">
+                        <div class="moderation-item-title">
+                            ${escapeHtml(article.title)}
+                            <span class="status-badge status-${article.status}">
+                                ${getStatusText(article.status)}
+                            </span>
+                        </div>
+                        <div class="moderation-item-author">Автор: ${escapeHtml(article.author)}</div>
+                    </div>
+                    <div class="moderation-item-preview">
+                        ${escapeHtml(article.text.substring(0, 300))}...
+                    </div>
+                    <div class="moderation-buttons">
+                        <button onclick="openArticleModal(${article.id})">Смотреть полностью</button>
+                        ${article.status === 'pending' ? `
+                            <button class="success" onclick="approveArticle(${article.id})">Одобрить</button>
+                            <button class="danger" onclick="rejectArticle(${article.id})">Отклонить</button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openArticleModal(id) {
+            const article = data.articles.find(a => a.id === id);
+            if (!article) return;
+
+            document.getElementById('modalArticleTitle').textContent = article.title;
+            document.getElementById('modalArticleAuthor').textContent = article.author;
+            document.getElementById('modalArticleDate').textContent = formatDate(article.date);
+            document.getElementById('modalArticleContent').textContent = article.text;
+
+            let actionsHtml = '';
+            if (article.status === 'pending') {
+                actionsHtml = `
+                    <button class="success" onclick="approveArticle(${article.id}); closeArticleModal();" style="width: 100%; margin-bottom: 0.5rem;">Одобрить</button>
+                    <button class="danger" onclick="rejectArticle(${article.id}); closeArticleModal();">Отклонить</button>
+                `;
+            } else {
+                actionsHtml = `<p style="color: #666; text-align: center;">Статус: ${getStatusText(article.status)}</p>`;
+            }
+            document.getElementById('modalArticleActions').innerHTML = actionsHtml;
+
+            document.getElementById('articleModal').classList.add('active');
+        }
+
+        function closeArticleModal() {
+            document.getElementById('articleModal').classList.remove('active');
+        }
+
+        function approveArticle(id) {
+            const article = data.articles.find(a => a.id === id);
+            if (article) {
+                article.status = 'approved';
+                article.date = new Date().toISOString().split('T')[0];
+                renderModerationList();
+                showMessage('Статья одобрена и опубликована!', 'success');
+            }
+        }
+
+        function rejectArticle(id) {
+            const article = data.articles.find(a => a.id === id);
+            if (article) {
+                article.status = 'rejected';
+                renderModerationList();
+                showMessage('Статья отклонена', 'info');
+            }
+        }
+
+        // Utilities
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('ru-RU', options);
+        }
+
+        function getStatusText(status) {
+            const statuses = {
+                pending: 'Ожидает проверки',
+                approved: 'Одобрена',
+                rejected: 'Отклонена'
+            };
+            return statuses[status] || status;
+        }
+
+        function showMessage(text, type) {
+            const main = document.querySelector('main');
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            message.textContent = text;
+            main.insertBefore(message, main.firstChild);
+            setTimeout(() => message.remove(), 4000);
+        }
+
+        // Initialize
+        updateHeader();
+        renderArticles();
+    </script>
+</body>
+</html>
